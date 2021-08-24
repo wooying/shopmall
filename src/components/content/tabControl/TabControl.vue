@@ -31,7 +31,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
   .tab-control {
     display: flex;
     font-size: 15px;
