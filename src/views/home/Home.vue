@@ -19,7 +19,6 @@ import NavBar from 'components/common/navbar/NavBar'
 import Scroll from 'components/common/scroll/Scroll'
 import TabControl from 'components/content/tabControl/TabControl'
 import GoodsList from 'components/content/goods/GoodsList'
-import BackTop from 'components/content/backTop/BackTop'
 
 import HomeSwiper from './childComps/HomeSwiper'
 import RecommendView from './childComps/RecommendView.vue'
@@ -27,7 +26,7 @@ import FeatureView from './childComps/FeatureView.vue'
 
 import {getHomeMultidata} from 'network/home'
 import {getHomeGoods} from 'network/home'
-import {debounce} from 'common/utils.js'
+import {itemListenerMixin, backTopMinin} from 'common/mixin.js'
 
 // import {SwiperItem} from 'components/common/swiper/SwiperItem'
 
@@ -41,7 +40,6 @@ export default {
     TabControl,
     GoodsList,
     Scroll,
-    BackTop
   },
   data() {
     return {
@@ -53,12 +51,13 @@ export default {
         'sell': {page: 0, list: []}
       },
       currentType: 'pop',
-      isShow: false,
       tabOffsetTop: 0,
       isTabFixed: false,
-      saveY: 0
+      saveY: 0,
+      itemImgListener: null
     }
   },
+  mixins: [itemListenerMixin, backTopMinin],
   computed: {
     showGoods() {
       return this.goods[this.currentType].list
@@ -80,15 +79,13 @@ export default {
     this.$refs.scroll.refresh();
   },
   deactivated() {
+    // 1.保存y值
     this.saveY = this.$refs.scroll.getScrollY();
+    // 2.取消全局事件的监听
+    this.$bus.$off('itemImageLoad', this.itemImgListener)
   },
   mounted() {
-    const refresh = debounce(this.$refs.scroll.refresh, 500);
-    // 3.监听item中图片加载完成
-    this.$bus.$on('itemImageLoad', () => {
-      // console.log('-----');
-      refresh();
-    })
+    
   },
   methods: {
     /**
@@ -110,9 +107,7 @@ export default {
       this.$refs.tabControl1.currentIndex = index;
       this.$refs.tabControl2.currentIndex = index;
     },
-    backClick() {
-      this.$refs.scroll.scrollTo(0, 0,300);
-    },
+    
     contentScroll(position) {
       // console.log(position);
       // 1.判断backTop是否显示
@@ -134,6 +129,7 @@ export default {
     getHomeMultidata() {
       getHomeMultidata().then(res => {
       // this.result = res;
+      console.log(res);
       this.banners = res.data.banner.list;
       this.recommends = res.data.recommend.list;
       })
