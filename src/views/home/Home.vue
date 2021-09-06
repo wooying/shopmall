@@ -137,7 +137,7 @@ export default {
     getHomeGoods(type) {
       const page = this.goods[type].page + 1
       getHomeGoods(type, page).then(res => {
-      // console.log(res);
+      console.log(res);
       // 将请求的数据保存
       // this.goods[type].list = res.data.list;
       this.goods[type].list.push(...res.data.list);
